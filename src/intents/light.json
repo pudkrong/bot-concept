@@ -1,0 +1,21 @@
+{
+  "entities": {
+    "room": {
+      "questions": [
+        "Which room?",
+        "Can you please tell me which room you want?"
+      ]
+    },
+    "color": {
+      "questions": [
+        "Which color?"
+      ],
+      "answers": [
+        "red",
+        "green",
+        "blue"
+      ]
+    }
+  },
+  "fulfilled": "Great!!! I will turn on light in {{room}} in {{color}} color."
+}
