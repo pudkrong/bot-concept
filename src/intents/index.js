@@ -1,8 +1,10 @@
 const Handlebars = require('handlebars');
+const log = require('../lib/logger')('decision');
 
 async function decision (intent, entities = {}) {
   try {
     const requiredEntities = require(`./${intent}.json`);
+    log.info('load intent stories', { intent });
     const missingEntity = Object.keys(requiredEntities.entities).find((key) => {
       return !entities[key];
     });
@@ -26,7 +28,7 @@ async function decision (intent, entities = {}) {
       };
     }
   } catch (error) {
-    console.warn('Cannot find data for the given intent', intent);
+    log.warn('Cannot find data for the given intent', intent);
     return null;
   }
 }

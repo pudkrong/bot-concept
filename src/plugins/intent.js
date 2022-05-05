@@ -1,8 +1,11 @@
 const axios = require('axios');
 const _ = require('lodash');
+const log = require('../lib/logger')('plugin');
 
 async function intent (context) {
-  if (!_.get(context.state, 'intent', null)) {
+  const shouldLookingForIntent = !_.get(context.state, 'intent', null);
+
+  if (shouldLookingForIntent) {
     const msg = context.event.isText ? context.event.message.text : '';
     const matches = /^intent\s+(\w+)\s*(.*)/.exec(msg);
     let intent = '';
@@ -17,6 +20,7 @@ async function intent (context) {
     });
 
     if (result.status === 200) {
+      log.info('Add intent and entities into state', { intent, entities });
       context.setIntent(intent);
       const entitiesState = {};
       entities.forEach((entity) => {
@@ -28,7 +32,7 @@ async function intent (context) {
       });
     }
   } else {
-    console.log('plugins: skip due to multi-turn dialog');
+    log.info('This turn is from the previous intent', context.state.intent);
   }
 }
 

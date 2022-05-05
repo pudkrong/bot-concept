@@ -1,6 +1,7 @@
 const { router, text } = require('bottender/router');
 const { values } = require('lodash');
 const decision = require('./intents/index');
+const log = require('./lib/logger')('main');
 
 async function sayHi (context) {
   const count = context.state.count + 1;
@@ -17,12 +18,12 @@ async function echo (context) {
 }
 
 async function unknown (context) {
-  console.log('CONTEXT', context);
+  log.info('CONTEXT', context);
   await context.sendText('I don\'t understand');
 }
 
 async function reset (context) {
-  console.log('RESET State');
+  log.info('RESET State');
   context.resetState();
   await context.sendText('state is reset');
 }
@@ -36,9 +37,6 @@ function validateAnswer (context) {
 }
 
 async function external (context) {
-  console.log('external fn: CONTEXT state =>', context.state);
-  console.log('external fn: Text =>', context.event.message.text);
-
   if (context.intent) context.setState({ intent: context.intent });
   if (context.state.acquiredEntity) {
     // TONOTE:: Validate answer
@@ -60,18 +58,20 @@ async function external (context) {
   if (!context.state.intent) {
     await context.sendText('I don\'t understand');
   } else {
-    console.log('Call microservice with ', context.state);
+    log.info('Calling function with payload', context.state);
     const result = await decision(context.state.intent, context.state.entities);
     if (!result) return;
 
     if (!result.fulfilled) {
       if (result.acquiredEntity) {
+        log.info('Set state as', result);
         context.setState({
           acquiredEntity: result.acquiredEntity,
           answers: result.answers || null
         });
       }
 
+      log.info('Send question to client');
       await context.sendText(result.question);
     } else {
       await context.sendText(result.reply);
