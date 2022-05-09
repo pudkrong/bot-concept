@@ -52,7 +52,7 @@ module.exports = {
     telegram: {
       enabled: true,
       path: '/webhooks/telegram',
-      accessToken: process.env.TELEGRAM_ACCESS_TOKEN || '564458885:AAGRVUZCHu7gPst94mY-sBkAF1m98EwnOv8'
+      accessToken: process.env.TELEGRAM_ACCESS_TOKEN
     },
     slack: {
       enabled: false,

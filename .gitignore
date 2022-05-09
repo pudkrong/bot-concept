@@ -64,3 +64,4 @@ typings/
 
 # session fuke
 .session
+.sessions

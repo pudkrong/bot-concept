@@ -28,46 +28,33 @@ async function reset (context) {
   await context.sendText('state is reset');
 }
 
-function validateAnswer (context) {
-  if (context.state.answers) {
-    return context.state.answers.indexOf(context.event.message.text) !== -1;
-  } else {
-    return true;
-  }
-}
-
 async function external (context) {
   if (context.intent) context.setState({ intent: context.intent });
-  if (context.state.acquiredEntity) {
-    // TONOTE:: Validate answer
-    if (validateAnswer(context)) {
-      const entities = context.state.entities || {};
-      entities[context.state.acquiredEntity] = context.event.message.text;
-      context.setState({
-        entities,
-        acquiredEntity: null
-      });
-    } else {
-      // TONOTE:: Send answer to external decision system
-      context.resetState();
-      context.sendText('Your answer is not correct. We are try our best to give you answer');
-      return;
-    }
-  }
 
   if (!context.state.intent) {
     await context.sendText('I don\'t understand');
   } else {
-    log.info('Calling function with payload', context.state);
-    const result = await decision(context.state.intent, context.state.entities);
+    let result = null;
+    if (context.state.acquiredEntity) {
+      log.info('Calling function with acquired entity', context.state);
+      result = await decision(context.state.intent, context.state.entities, {
+        entity: context.state.acquiredEntity,
+        value: context.event.message.text
+      });
+    } else {
+      log.info('Calling function without acquired entity', context.state);
+      result = await decision(context.state.intent, context.state.entities);
+    }
     if (!result) return;
 
+    log.info('Decision result', result);
     if (!result.fulfilled) {
       if (result.acquiredEntity) {
         log.info('Set state as', result);
         context.setState({
+          intent: result.intent,
+          entities: result.entities,
           acquiredEntity: result.acquiredEntity,
-          answers: result.answers || null
         });
       }
 

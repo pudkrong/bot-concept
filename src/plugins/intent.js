@@ -3,32 +3,21 @@ const _ = require('lodash');
 const log = require('../lib/logger')('plugin');
 
 async function intent (context) {
+  if (context.event.message.text === 'reset') return;
+
   const shouldLookingForIntent = !_.get(context.state, 'intent', null);
 
   if (shouldLookingForIntent) {
-    const msg = context.event.isText ? context.event.message.text : '';
-    const matches = /^intent\s+(\w+)\s*(.*)/.exec(msg);
-    let intent = '';
-    let entities = [];
-    if (matches) {
-      intent = matches[1];
-      entities = /\w/.test(matches[2]) ? matches[2].split(' ') : [];
-    }
+    const text = context.event.isText ? context.event.message.text : '';
 
-    const result = await axios.post('https://httpbin.org/post', {
-      data: { intent }
-    });
+    const result = await axios.post(process.env.INTENT_ENDPOINT, { text });
 
     if (result.status === 200) {
+      const { intent, entities } = result.data;
       log.info('Add intent and entities into state', { intent, entities });
       context.setIntent(intent);
-      const entitiesState = {};
-      entities.forEach((entity) => {
-        const [key, value] = entity.split(':');
-        entitiesState[key] = value;
-      });
       context.setState({
-        entities: entitiesState
+        entities
       });
     }
   } else {

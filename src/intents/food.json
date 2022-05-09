@@ -1,0 +1,10 @@
+{
+  "entities": {
+    "type": {
+      "questions": [
+        "Which kind of food do you like?"
+      ]
+    }
+  },
+  "fulfilled": "I will remember that you like {{type}} food."
+}
