@@ -62,3 +62,30 @@ npm run mock
   - turn on
   - turn on light in bedroom
   - i am hungry
+
+## Skills
+We are using json file to tell the system what entities are required to fulfill the intent. Each file presents single skill. For example, we will create `light` skill for bot to be able to turn on light in the specific room and specific color. We will name the file as intent i.e. `light.json` located in folder `intents`.
+
+```json
+{
+  "entities": {
+    "room": {
+      "questions": [
+        "Which room?",
+        "Can you please tell me which room you want?"
+      ]
+    },
+    "color": {
+      "questions": [
+        "Which color?"
+      ],
+      "answers": [
+        "red",
+        "green",
+        "blue"
+      ]
+    }
+  },
+  "fulfilled": "Great!!! I will turn on light in {{room}} in {{color}} color."
+}
+```
