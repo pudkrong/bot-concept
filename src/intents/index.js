@@ -17,31 +17,42 @@ async function processNlu (text) {
   }
 }
 
-async function decision (intent, entities = [], validate = null) {
+async function decision (text, intent = null, entities = [], validate = null) {
   try {
+    if (!intent) {
+      log.info('Send text to NLU', text);
+      const result = await processNlu(text);
+      if (result.intent === null) {
+        return {
+          fulfilled: true,
+          reply: 'I do not understand'
+        }
+      }
+
+      log.info('NLU: ', result);
+      intent = result.intent;
+      entities = result.entities || [];
+    }
+
     const requiredEntities = require(`./${intent}.json`);
-    log.info('load intent stories', { intent });
     // Validate given entity
     if (validate) {
       const answers = _.get(requiredEntities, `entities.${validate.entity}.answers`, null);
-      log.info('Validate set', requiredEntities, validate, answers);
       if (answers) {
         const valid = answers.indexOf(validate.value) !== -1;
-        log.info('Validate result', valid);
+        log.info('Is answer valid?', valid);
         if (valid) {
           entities.push({
             entity: validate.entity,
             value: validate.value
           });
         } else {
-          // Validation is failed
-          // Re-send to intent extraction
-          log.info('Send to extract new entities', validate);
-          const { intent, entities } = await processNlu(validate.value);
-          log.info('New extract result', intent, entities);
-          return decision(intent, entities);
+          // Validation is failed, then call decision to process new text
+          return decision(validate.value);
         }
       } else {
+        // Validation is not provided
+        // Simply assign input to the acquired entity and return
         entities.push({
           entity: validate.entity,
           value: validate.value
@@ -49,6 +60,7 @@ async function decision (intent, entities = [], validate = null) {
       }
     }
 
+    // Searching for next acquired entity
     const missingEntity = Object.keys(requiredEntities.entities).find((key) => {
       return entities.findIndex((el) => el.entity === key) === -1;
     });
@@ -79,7 +91,7 @@ async function decision (intent, entities = [], validate = null) {
       };
     }
   } catch (error) {
-    log.warn('Cannot find data for the given intent', intent);
+    log.error('Error', error);
     return null;
   }
 }

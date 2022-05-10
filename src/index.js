@@ -4,11 +4,7 @@ const decision = require('./intents/index');
 const log = require('./lib/logger')('main');
 
 async function sayHi (context) {
-  const count = context.state.count + 1;
-  context.setState({
-    count
-  });
-  await context.sendText(`Hi! ${context.state.count}`);
+  await context.sendText(`Hi! there. What can I help you today?`);
 }
 
 async function echo (context) {
@@ -29,46 +25,39 @@ async function reset (context) {
 }
 
 async function external (context) {
-  if (context.intent) context.setState({ intent: context.intent });
+  let result = null;
+  const text = context.event.message.text;
 
-  if (!context.state.intent) {
-    await context.sendText('I don\'t understand');
+  if (context.state.acquiredEntity) {
+    result = await decision(text, context.state.intent, context.state.entities, {
+      entity: context.state.acquiredEntity,
+      value: text
+    });
   } else {
-    let result = null;
-    if (context.state.acquiredEntity) {
-      log.info('Calling function with acquired entity', context.state);
-      result = await decision(context.state.intent, context.state.entities, {
-        entity: context.state.acquiredEntity,
-        value: context.event.message.text
+    result = await decision(text, context.state.intent, context.state.entities);
+  }
+  log.info('Decision: ', result);
+  if (!result) return;
+
+  if (!result.fulfilled) {
+    if (result.acquiredEntity) {
+      context.setState({
+        intent: result.intent,
+        entities: result.entities,
+        acquiredEntity: result.acquiredEntity
       });
-    } else {
-      log.info('Calling function without acquired entity', context.state);
-      result = await decision(context.state.intent, context.state.entities);
     }
-    if (!result) return;
 
-    log.info('Decision result', result);
-    if (!result.fulfilled) {
-      if (result.acquiredEntity) {
-        log.info('Set state as', result);
-        context.setState({
-          intent: result.intent,
-          entities: result.entities,
-          acquiredEntity: result.acquiredEntity,
-        });
-      }
-
-      log.info('Send question to client');
-      await context.sendText(result.question);
-    } else {
-      await context.sendText(result.reply);
-      context.resetState();
-    }
+    await context.sendText(result.question);
+  } else {
+    await context.sendText(result.reply);
+    context.resetState();
   }
 }
 
 module.exports = async function App (context) {
   return router([
+    text(/^(hi|hello)$/, sayHi),
     text('reset', reset),
     text('*', external)
   ]);

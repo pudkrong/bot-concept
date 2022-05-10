@@ -1,0 +1,136 @@
+{
+  "uuid": "ca7581f3-9c97-461d-81b0-09059e659b10",
+  "lastMigration": 19,
+  "name": "NLU",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3001,
+  "hostname": "0.0.0.0",
+  "routes": [
+      {
+          "uuid": "c7085725-da85-41a4-b5d0-bd35ac8b0bd3",
+          "documentation": "",
+          "method": "post",
+          "endpoint": "intents/extract",
+          "responses": [
+              {
+                  "uuid": "49f8b957-a334-4b22-85e7-aa33029e9d1c",
+                  "body": "{\n  \"intent\": null\n}",
+                  "latency": 0,
+                  "statusCode": 200,
+                  "label": "Cannot extract intent",
+                  "headers": [],
+                  "filePath": "",
+                  "sendFileAsBody": false,
+                  "rules": [],
+                  "rulesOperator": "OR",
+                  "disableTemplating": false,
+                  "fallbackTo404": true
+              },
+              {
+                  "uuid": "bcdb5a21-56dc-4dfb-87a3-4e40fbbc59ca",
+                  "body": "{\n  \"intent\": \"light\",\n  \"entities\": [\n    {\n      \"entity\": \"room\",\n      \"value\": \"bedroom\"\n    }\n  ]\n}",
+                  "latency": 0,
+                  "statusCode": 200,
+                  "label": "Intent = light, entities = room:bedroom",
+                  "headers": [],
+                  "filePath": "",
+                  "sendFileAsBody": false,
+                  "rules": [
+                      {
+                          "target": "body",
+                          "modifier": "text",
+                          "value": "turn|switch",
+                          "operator": "regex"
+                      },
+                      {
+                          "target": "body",
+                          "modifier": "text",
+                          "value": "bedroom",
+                          "operator": "regex"
+                      }
+                  ],
+                  "rulesOperator": "AND",
+                  "disableTemplating": false,
+                  "fallbackTo404": false
+              },
+              {
+                  "uuid": "840dfde8-194a-46fa-9627-f55ff5e62c82",
+                  "body": "{\n  \"intent\": \"light\"\n}",
+                  "latency": 0,
+                  "statusCode": 200,
+                  "label": "intent = light",
+                  "headers": [],
+                  "filePath": "",
+                  "sendFileAsBody": false,
+                  "rules": [
+                      {
+                          "target": "body",
+                          "modifier": "text",
+                          "value": "turn|switch",
+                          "operator": "regex"
+                      }
+                  ],
+                  "rulesOperator": "OR",
+                  "disableTemplating": false,
+                  "fallbackTo404": true
+              },
+              {
+                  "uuid": "f9cc9e96-b86a-4cf2-bf21-d713c6d19f28",
+                  "body": "{\n  \"intent\": \"food\"\n}",
+                  "latency": 0,
+                  "statusCode": 200,
+                  "label": "intent = food",
+                  "headers": [],
+                  "filePath": "",
+                  "sendFileAsBody": false,
+                  "rules": [
+                      {
+                          "target": "body",
+                          "modifier": "text",
+                          "value": "hungry",
+                          "operator": "regex"
+                      }
+                  ],
+                  "rulesOperator": "OR",
+                  "disableTemplating": false,
+                  "fallbackTo404": true
+              }
+          ],
+          "enabled": true,
+          "randomResponse": false,
+          "sequentialResponse": false
+      }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+      "enabled": false,
+      "type": "CERT",
+      "pfxPath": "",
+      "certPath": "",
+      "keyPath": "",
+      "caPath": "",
+      "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+      {
+          "key": "Content-Type",
+          "value": "application/json"
+      }
+  ],
+  "proxyReqHeaders": [
+      {
+          "key": "",
+          "value": ""
+      }
+  ],
+  "proxyResHeaders": [
+      {
+          "key": "",
+          "value": ""
+      }
+  ]
+}

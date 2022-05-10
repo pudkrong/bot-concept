@@ -24,7 +24,7 @@ module.exports = {
 
   },
   plugins: [
-    require('./src/plugins/intent')
+    // require('./src/plugins/intent')
   ],
   channels: {
     messenger: {
